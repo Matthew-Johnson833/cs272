@@ -98,7 +98,7 @@ public class Controller {
 		// At least one special character (@, #, $, %, !)
 		// At least one upper case letter
 		// At least 8 characters long, but no more than 16
-		return password.matches("((?=.*[a-z])(?=.*d)(?=.*[@#$%!])(?=.*[A-Z]).{8,16})");
+		return password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\\\|,.<>\\/?]).{8,16}$");
 	}
 
 	public boolean isValidEmail(String email)
@@ -180,13 +180,56 @@ public class Controller {
 	public ObservableList<VideoGame> getGamesForCurrentUser()
 	{
 		ObservableList<VideoGame> userGamesList = FXCollections.observableArrayList();
-		//TODO: Implement this method
+		// 1) With the user_games table (mUserGamesDB), get the records that match the
+		// Note: the recprds returned will only contain the user_id and game_id (both in 
+		try
+        {
+            ArrayList<ArrayList<String>> resultsList = theOne.mUserGamesDB.getRecord(String.valueOf(theOne.mCurrentUser.getId()));
+            // Loop through the results
+            int gameId;
+            for (ArrayList<String> values : resultsList)
+            {
+                gameId = Integer.parseInt(values.get(1));
+                // Loop through all the games, try to find a match
+                for (VideoGame vg : theOne.mAllGamesList)
+                {
+                    if (gameId == vg.getId())
+                    {
+                        userGamesList.add(vg);
+                        break;
+                    }
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		
 		return userGamesList;
 	}
 
 	public boolean addGameToUsersInventory(VideoGame selectedGame)  {
-		//TODO: Implement this method
-		return true;
+		
+	    ObservableList<VideoGame> gamesOwnedByCurrentUser = getGamesForCurrentUser();
+	    if (gamesOwnedByCurrentUser.contains(selectedGame))
+	        return false;
+	    
+	    String[] values = {String.valueOf(theOne.mCurrentUser.getId()), 
+	            String.valueOf(selectedGame.getId())};
+	    try
+        {
+            theOne.mUserGamesDB.createRecord(USER_GAMES_FIELD_NAMES, values);
+            
+        }
+        catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return false;
+        }
+	    return true;
 	}
 
 	public User getCurrentUser()

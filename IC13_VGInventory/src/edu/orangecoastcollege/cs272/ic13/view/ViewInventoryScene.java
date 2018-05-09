@@ -18,18 +18,21 @@ public class ViewInventoryScene implements Initializable {
 	private ListView<VideoGame> userVideoGamesLV;
 	@FXML
 	private Label userLabel;
-	
+
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		//TODO: Complete this method
+		userLabel.setText(controller.getCurrentUser().getName());
+		userVideoGamesLV.setItems(controller.getGamesForCurrentUser());
+
 	}
-	
+
 
 	@FXML
-	public Object backToAllGames()
+	public void backToAllGames()
 	{
 		//TODO: Complete this method
-		return this;
+		ViewNavigator.loadScene("Video Game List", ViewNavigator.VIDEO_GAME_LIST_SCENE);
+
 	}
 }
